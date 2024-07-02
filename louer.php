@@ -1,4 +1,7 @@
 <?php
+
+session_start();
+
 $no = "";
 $ad = "";
 $em = "";
@@ -16,6 +19,9 @@ $cout = "";
 $row = "";
 $id = "";
 $cc = "";
+$mail = $_SESSION["mail"];
+$result1 = "";
+$rr= $_SESSION["id"];
 
 //connexion a la base de donnees 
 $nom_serveur = "localhost";
@@ -32,15 +38,15 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
         header("location: /immojeune/admin/logement.php");
         exit;
     }
-
-
     $id = $_GET["id"];
-    $sql = "SELECT * FROM logements WHERE id=$id";
+   $sql = "SELECT * FROM logements WHERE id=$id";
     $result = mysqli_query($connexion, $sql);
     $row = mysqli_fetch_assoc($result);
     $cc = $row["prixmensuel"];
 
 } else {
+    $id = $_GET["id"];
+    
     $no = $_POST['NO'];
     $ad = $_POST['AD'];
     $em = $_POST['EM'];
@@ -50,18 +56,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
     $sr = $_POST['SR'];
     $da = $_POST['DA'];
     $du = $_POST['DU'];
-    $dr = intval($_POST['DU']);
-    $id = $_GET["id"];
+    
     $r =  $sa + $sr;
 
-    $cout = $dr *intval($cc);
-    echo $cout;
-
+    $cout = intval($cc) * intval($du) ;
+    
     do {
         if (empty($no) || empty($ad) || empty($em) || empty($si) || empty($pn) || empty($sa) || empty($sr) || empty($da) || empty($du)) {
             $errorMessage = "All the fiels are required";
         } else {
-            $insert = "INSERT INTO `reservations`(`idlogement`,`nomc`, `adressec`, `numeroc`, `situationc`, `salaire`, `date`, `duree de location`) VALUES ( $id,'$no','$ad',$pn,'$si',$r,'$da','$du')";
+            $insert = "INSERT INTO `reservations`(`idlogement`,`idclient`, `nomc`, `adressec`, `numeroc`, `situationc`, `salaire`, `date`, `duree de location`,`cout`,`dateR`) VALUES ( $id,$rr,'$no','$ad',$pn,'$si',$r,'$da','$du','$cout',CURDATE())";
             $b = $connexion->query($insert);
 
             if (!$b) {
@@ -121,7 +125,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
             <div class="red">
                 <div class="headr">
 
-                    <li><a href="">Decouvrir</a></li>
+                    <li><a href="/immojeune/src/decouvrir.php">Decouvrir</a></li>
                     <li><a href="">Louer</a></li>
                     <li><a href="">Proposer un bien</a></li>
                     <li><a href="">HouzezForSchool</a> </li>
@@ -130,16 +134,34 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
                 <div class="headm">
                     <li class="t"><a href="">en</a></li>
                     <?php
-                    // if(isset($_SESSION['richard']) AND !empty($_SESSION['richard'])){
-                    //     echo "affiche boule";
-                    // }else{ 
-                    ?>
-                    <li class="t">|</li>
-                    <li><a href="#" class="login2">Se connecter</a></li>
-                    <li class="t">-</li>
-                    <li><a href="#" class="login1">S'inscrire</a></li>
+                    if (isset($_SESSION['nom']) and !empty($_SESSION['nom'])) { ?>
+
+                        <div style=" display: flex;
+background-color: rgb(255, 213, 0);
+border-radius: 30px;
+height: 40px;
+width: 140px;
+justify-content: center;
+align-items: center;
+font-size: 1.1em;
+font-weight: 600;
+margin-left: 60px;
+margin-top: -10px;
+position:absolute;
+padding:0 10px;
+">
+                            <a href="" style="color:black"><?php echo $_SESSION['nom']; ?></a>
+
+                        </div>
                     <?php
-                    // }
+                    } else {
+                    ?>
+                        <li class="t">|</li>
+                        <li><a href="/immojeune/src/login.php" class="login2">Se connecter</a></li>
+                        <li class="t">-</li>
+                        <li><a href="/immojeune/src/register.php" class="login1">S'inscrire</a></li>
+                    <?php
+                    }
                     ?>
                 </div>
                 <div class="btn">
@@ -168,7 +190,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
         <div class="info">
             <p id="pp"> <i class='bx bxs-star'></i> Particulier</p>
             <div>
-                <h1><?php echo $row["type"]; ?></h1>
+                <h1><?php echo $row["type"]; echo $cc?></h1>
                 <p> <i class='bx bx-location-plus'></i><?php echo $row["Emplacement"]; ?> <i class='bx bx-time-five'></i>Publié il y a un Mois</p>
             </div>
             <div>

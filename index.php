@@ -1,20 +1,24 @@
 <?php
 
-session_start();
 
 $nom_serveur = "localhost";
 $utilisateur = "root";
 $mot_de_passe = "";
 $nom_bd = "logements_etudiants";
-$mail=$_SESSION["mail"];
+
 
 $connexion = mysqli_connect($nom_serveur, $utilisateur, $mot_de_passe, $nom_bd);
 
-$sql = "SELECT id AS total FROM `utilisateurs` WHERE email= '$mail'";
-$result = mysqli_query($connexion, $sql);
-$row = mysqli_fetch_assoc($result);
+if(isset($_COOKIE['nom_utilisateur']) && isset($_COOKIE['email_utilisateur'])){
+    $mail = $_COOKIE['email_utilisateur'];
+    $sql = "SELECT id AS total FROM `utilisateurs` WHERE email= '$mail'";
+    $result = mysqli_query($connexion, $sql);
+    $row = mysqli_fetch_assoc($result);
 
-$_SESSION["id"]= $row["total"];
+// Sauvegarder les données dans des cookies
+    $id_utilisateur = $row["total"];
+    setcookie("id", $id_utilisateur, time() + (86400 * 30), "/");
+}
 
 $number = "";
 $mail = "";
@@ -56,17 +60,17 @@ $a = "";
             <div class="red">
                 <div class="headr">
 
-                    <li><a href="/immojeune/acceuil.php">Acceuil</a></li>
+                    <li><a href="/immojeune/index.php">Acceuil</a></li>
                     <li><a href="/immojeune/src/decouvrir.php">Logements</a></li>
                     <li><a href="/immojeune/src/agent.php">Nos agents</a></li>
                     <li><a href="/immojeune/src/contact.php">Contacts</a> </li>
-                    <li><a href="">A propos</a></li>
+                    <li><a  href="/immojeune/src/about.php">A propos</a></li>
                 </div>
                 <div class="headm">
                     <li class="t"><a href="">en</a></li>
                     <?php
-                    if (isset($_SESSION['nom']) and !empty($_SESSION['nom'])) { ?>
-      <details >
+                   if(isset($_COOKIE['nom_utilisateur']) && isset($_COOKIE['email_utilisateur'])) { ?>
+                        <details>
                             <summary>
                                 <div class="roro" style=" display: flex;
 background-color: rgb(255, 213, 0);
@@ -83,7 +87,7 @@ position:absolute;
 padding:0 10px;
 cursor:pointer;
 ">
-                                    <a href="" style="color:black"><?php echo $_SESSION['nom']; ?></a>
+                                    <p href="" style="color:black"><?php echo $_COOKIE['nom_utilisateur'];; ?></p>
                                 </div>
                             </summary>
 
@@ -99,15 +103,20 @@ flex-direction:column;
 justify-content:space-between;
 align-items:center;
 padding:20px 0;
+font-weight: 600;
 ">
-
+<a href="/immojeune/src/notifications.php" style="  position: absolute;
+font-size:1.3em;
+margin-top:-10px;
+margin-left:200px;
+color:black;"><i class='bx bxs-bell ' ></i></a>
                                 <p style="background-color:rgb(255, 213, 0);height:80px; width: 250px;margin-top:-20px;border-radius:20px 20px 0 0;display:flex;justify-content:center">
                                     <i class="bx bxs-user-circle bx-tada" style="font-size:4em;position:absolute;z-index:2  ;margin-top:40px;background-color:black;color:aliceblue;border-radius:100%"></i>
                                 </p>
-                                <p style="margin-top:20px;margin-bottom:-10px"><?php echo $_SESSION["nom"] ?></p>
-                                <p><?php echo $_SESSION["mail"] ?></p>
-                                <p><a href="" style="color:rgb(14, 227, 227); display:flex;  align-items:center;"> <i class='bx bxs-edit' style="font-size:1.5em"></i> Edit profile</a></p>
-                                <p><a href="" style="color:red;margin-top:-10px; display:flex;  align-items:center;"><i class='bx bx-log-out' style="font-size:1.5em"></i> Se deconnecter</a> </p>
+                                <p style="margin-top:20px;margin-bottom:-10px"><?php echo $_COOKIE['nom_utilisateur']; ?></p>
+                                <p><?php echo $_COOKIE['email_utilisateur']; ?></p>
+                                <p><a href="/immojeune/src/userprofile.php"  style="color:rgb(14, 227, 227); display:flex;  align-items:center;"> <i class='bx bxs-edit' style="font-size:1.5em"></i> Edit profile</a></p>
+                                <p><a href="/immojeune/src/fin.php" style="color:red;margin-top:-10px; display:flex;  align-items:center;"><i class='bx bx-log-out' style="font-size:1.5em"></i> Se deconnecter</a> </p>
 
                             </div>
                         </details>
@@ -122,18 +131,7 @@ padding:20px 0;
                     }
                     ?>
                 </div>
-              
-                <div class="log">
 
-                    <p style="background-color:rgb(255, 213, 0);height:80px; width: 250px;margin-top:-20px;border-radius:20px 20px 0 0;display:flex;justify-content:center">
-                        <i class="bx bxs-user-circle bx-tada" style="font-size:4em;position:absolute;z-index:2  ;margin-top:40px;background-color:black;color:aliceblue;border-radius:100%"></i>
-                    </p>
-                    <p style="margin-top:20px;margin-bottom:-10px"><?php echo $_SESSION["nom"] ?></p>
-                    <p><?php echo $_SESSION["mail"] ?></p>
-                    <p><a href="" style="color:rgb(14, 227, 227); display:flex;  align-items:center;"> <i class='bx bxs-edit' style="font-size:1.5em"></i> Edit profile</a></p>
-                    <p><a href="" style="color:red;margin-top:-10px; display:flex;  align-items:center;"><i class='bx bx-log-out' style="font-size:1.5em"></i> Se deconnecter</a> </p>
-
-                </div>
                 <div class="btn">
                     <li><a href="">DEPOSER UNE ANNONCE</a></li>
                 </div>
@@ -145,10 +143,10 @@ padding:20px 0;
         <div class="body">
             <p class="h1">Logement etudiant et location jeune actif <a href="">partout au Cameroun </a></p>
             <h4> Faites votre recherche parmi plus de 20000 offres de logements etudiants</h4>
-            <form action="" class="form">
+            <form action="/immojeune/src/decouvrir.php" class="form" method="post">
                 <i class='bx bx-search-alt-2'></i>
-                <input type="text" value="" placeholder="Rechecher par ville ou par ecole" required class="ii">
-                <button type="submit">TROUVER UN LOGEMENT</button>
+                <input type="text" value="" name="vy" placeholder="Rechecher par ville ou par ecole" required class="ii">
+                <button type="submit" name="okr">TROUVER UN LOGEMENT</button>
             </form>
             <p>Découvrez nos annonces : <a href="">Résidence étudiante</a> - <a href="">Particulier à particulier</a> - <a href="">Agence immobilière</a> - <a href="">Colocation </a> - <a href="">Chambre</a></p>
         </div>
@@ -172,19 +170,73 @@ padding:20px 0;
                         <p>3</p>J'obtiens rapidement une reponse
                     </li>
                 </ul>
-                <form action="">
-                    <button class="i1"> Commencer ma recherche</button>
+                <form action="" >
+                    <button class="i1" for="ooop"> <a href=" /immojeune/src/decouvrir.php" id="ooop" style="color:black">Commencer ma recherche</a></button>
                     <button class="i2"> Decouvrir Houzez plus</button>
                 </form>
             </div>
         </div>
     </section>
 
-    <div class="foot">
-        <?php
-        include("src/fin.php");
-        ?>
-    </div>
+   
+    <section class="fin">
+        <div class="w">
+            <h1>Houzez</h1>
+            <p style="color: rgb(13, 216, 216);">
+                Que vous soyez étudiant à la recherche d’un logement,
+                bailleur particulier ou professionnel de l’immobilier souhaitant trouver un locataire,
+                Houzez vous accompagne dans toutes les étapes de votre projet de location !</p>
+        </div>
+        <div class="ww">
+            <div id="c">
+                <ul>
+                    <li>Mentions légales</li>
+                    <li>Plan du site</li>
+                    <li>Actualités ImmoJeune</li>
+                    <li>Partenaires</li>
+                </ul>
+
+                <button>CENTRE D'AIDE</button>
+            </div>
+            <div id="c">
+                <h3> ImmoJeune</h3>
+                <p>Accueil</p>
+                <p>Publier une annonce</p>
+                <p>Locataire</p>
+                <p>Propriétaire</p>
+                <p>Résidence étudiante</p>
+            </div>
+            <div id="c">
+                <h3> Votre logement étudiant</h3>
+                <p>Résidence étudiante</p>
+                <p>Location étudiant</p>
+                <p>Colocation</p>
+                <p>Location courte durée</p>
+                <p>Location studio</p>
+            </div>
+            <div id="c" style="width:270px;margin-left:30px">
+                <h3> Nos villes coup de coeur</h3>
+                <p>Yaoundé</p>
+                <p>Douala</p>
+                <p>Buea</p>
+                <p>Bamenda</p>
+            </div>
+            <div id="c">
+                <h3> Suivez-nous</h3>
+                <p>
+                <i class='bx bxl-facebook-circle'></i>
+                <i class='bx bxl-youtube' ></i>
+                <i class='bx bxl-twitter'></i>
+                <i class='bx bxl-instagram-alt' ></i>
+
+                </p>
+            </div>
+        </div>
+        <div class="www">
+            <h4>Houzez © 2023-2024, conçu et fièrement développé au Cameroun.</h4>
+        </div>
+    </section>
+    
 
 </body>
 
